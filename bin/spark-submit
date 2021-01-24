@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# -z 检查后面的变量是否为空，如果是空则为真
+# source 命令是在当前bash环境下读取并执行find-spark-home中的命令
+#  $0 代表shell脚本本身的文件名，这里即是spark-submit
+# dirname 取得脚本文件所在目录，dirname $0 表示该文件的所在目录名
+if [ -z "${SPARK_HOME}" ]; then
+  source "$(dirname "$0")"/find-spark-home
+fi
+
+# disable randomized hash for string in Python 3.3+
+export PYTHONHASHSEED=0
+# $@表示 spark-submit 提交命令中所有的参数
+# 这里又调用了/bin/spark-class 脚本，将 org.apache.spark.deploy.SparkSubmit 和
+# $@  (--master --deploy-mode --class 等等参数) 作为参数传给 spark-class 脚本
+# 接着去看/bin/spark-class 里面是什么
+exec "${SPARK_HOME}"/bin/spark-class org.apache.spark.deploy.SparkSubmit "$@"
